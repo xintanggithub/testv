@@ -80,7 +80,10 @@ class MainDialog extends ComponentDialog {
 
         // Call LUIS and gather any potential booking details. (Note the TurnContext has the response to the prompt)
         const luisResult = await this.luisRecognizer.executeLuisQuery(stepContext.context);
-        switch (LuisRecognizer.topIntent(luisResult)) {
+        console.log('luisResult ==>', JSON.stringify(luisResult));
+        const luisIntentStr = LuisRecognizer.topIntent(luisResult);
+        console.log('luisIntentStr ==>',luisIntentStr)
+        switch (luisIntentStr) {
         case 'BookFlight': {
             // Extract the values for the composite entities from the LUIS result.
             const fromEntities = this.luisRecognizer.getFromEntities(luisResult);
@@ -107,18 +110,21 @@ class MainDialog extends ComponentDialog {
         }
 
         case 'getname': {
-            // We haven't implemented the GetWeatherDialog so we just display a TODO message.
-            const getWeatherMessageText = '我想到了';
-            // const content = getWeatherMessageText + JSON.stringify(this.requestFoot('火锅', '上海'));
-            // console.log('content === = = =>', content);
-            this.requestFoot('火锅', '上海', async function result(data) {
-                console.log('requestFoot === = = =>', data);
-                const content = getWeatherMessageText + JSON.stringify(data);
-                await stepContext.context.sendActivity(content, content, InputHints.IgnoringInput);
+            const content = '就叫张三吧';
+            await stepContext.context.sendActivity(content, content, InputHints.IgnoringInput);
+            break;
+        }
+
+        case 'QueryFood': {
+            console.log('getname intent => getname');
+            console.log('requestFoot === = = => start');
+            await this.requestFoot('火锅', '上海', async function result(data) {
+                console.log('query foot list data success === = = =>');
+                const content = JSON.stringify(data);
+                stepContext.context.sendActivity(content, content, InputHints.IgnoringInput);
             }, function error(e) {
                 console.log('error === = = =>', e);
             });
-            // await stepContext.context.sendActivity(getWeatherMessageText, getWeatherMessageText, InputHints.IgnoringInput);
             break;
         }
 
@@ -202,7 +208,7 @@ class MainDialog extends ComponentDialog {
         }
 
         // Restart the main dialog with a different message the second time around
-        return await stepContext.replaceDialog(this.initialDialogId, { restartMsg: '正在思考你问的问题...' });
+        return await stepContext.replaceDialog(this.initialDialogId, { restartMsg: '正在查找答案，请稍后...' });
     }
 }
 
