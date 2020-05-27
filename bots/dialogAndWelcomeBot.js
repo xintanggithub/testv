@@ -1,0 +1,27 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+// const { InputHints } = require('botbuilder');
+const { DialogBot } = require('./dialogBot');
+
+class DialogAndWelcomeBot extends DialogBot {
+    constructor(conversationState, userState, dialog) {
+        super(conversationState, userState, dialog);
+
+        this.onMembersAdded(async (context, next) => {
+            const membersAdded = context.activity.membersAdded;
+            for (let cnt = 0; cnt < membersAdded.length; cnt++) {
+                if (membersAdded[cnt].id !== context.activity.recipient.id) {
+                    // const welcomeTips = '欢迎访问JDO bot service';
+                    // await context.sendActivity(welcomeTips, welcomeTips, InputHints.IgnoringInput);
+                    await dialog.run(context, conversationState.createProperty('DialogState'));
+                }
+            }
+
+            // By calling next() you ensure that the next BotHandler is run.
+            await next();
+        });
+    }
+}
+
+module.exports.DialogAndWelcomeBot = DialogAndWelcomeBot;
