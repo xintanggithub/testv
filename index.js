@@ -92,12 +92,18 @@ server.listen(process.env.port || process.env.PORT || 3978, function() {
     console.log('\nTo talk to your bot, open the emulator select "Open Bot"');
 });
 
+const { EchoBot } = require('./bot');
+const myBot = new EchoBot(luisRecognizer);
+const bot2 = new DialogAndWelcomeBot(conversationState, userState, myBot);
+
 // Listen for incoming activities and route them to your bot main dialog.
 server.post('/api/messages', (req, res) => {
     // Route received a request to adapter for processing
     adapter.processActivity(req, res, async (turnContext) => {
         // route to bot activity handler.
-        await bot.run(turnContext);
+        // await bot.run(turnContext);
+        // await myBot.run(turnContext);
+        await bot2.run(turnContext);
     });
 });
 

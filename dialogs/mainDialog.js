@@ -28,7 +28,6 @@ class MainDialog extends ComponentDialog {
                 this.actStep.bind(this),
                 this.finalStep.bind(this)
             ]));
-
         this.initialDialogId = MAIN_WATERFALL_DIALOG;
     }
 
@@ -82,7 +81,7 @@ class MainDialog extends ComponentDialog {
         const luisResult = await this.luisRecognizer.executeLuisQuery(stepContext.context);
         console.log('luisResult ==>', JSON.stringify(luisResult));
         const luisIntentStr = LuisRecognizer.topIntent(luisResult);
-        console.log('luisIntentStr ==>',luisIntentStr)
+        console.log('luisIntentStr ==>', luisIntentStr);
         switch (luisIntentStr) {
         case 'BookFlight': {
             // Extract the values for the composite entities from the LUIS result.
@@ -118,13 +117,20 @@ class MainDialog extends ComponentDialog {
         case 'QueryFood': {
             console.log('getname intent => getname');
             console.log('requestFoot === = = => start');
-            await this.requestFoot('火锅', '上海', async function result(data) {
-                console.log('query foot list data success === = = =>');
-                const content = JSON.stringify(data);
-                stepContext.context.sendActivity(content, content, InputHints.IgnoringInput);
-            }, function error(e) {
-                console.log('error === = = =>', e);
-            });
+            await stepContext.context.sendActivities([
+                { type: 'typing' },
+                { type: 'delay', value: 3000 },
+                { type: 'message', text: ' Finished  typing' }
+            ]);
+            // // const t = this;
+            // await this.requestFoot('火锅', '上海', async function result(data) {
+            //     console.log('query foot list data success === = = =>');
+            //     const content = JSON.stringify(data);
+            //     await stepContext.context.sendActivity(content, content, InputHints.IgnoringInput);
+            //     return await stepContext.next();
+            // }, function error(e) {
+            //     console.log('error === = = =>', e);
+            // });
             break;
         }
 
@@ -206,9 +212,17 @@ class MainDialog extends ComponentDialog {
             const msg = `I have you booked to ${ result.destination } from ${ result.origin } on ${ travelDateMsg }.`;
             await stepContext.context.sendActivity(msg, msg, InputHints.IgnoringInput);
         }
+        const luisResult = await this.luisRecognizer.executeLuisQuery(stepContext.context);
+        console.log('luisResult ==>', JSON.stringify(luisResult));
+        const luisIntentStr = LuisRecognizer.topIntent(luisResult);
+        console.log('luisIntentStr ==>', luisIntentStr);
 
-        // Restart the main dialog with a different message the second time around
-        return await stepContext.replaceDialog(this.initialDialogId, { restartMsg: '正在查找答案，请稍后...' });
+        if (luisIntentStr === 'QueryFood') {
+            await stepContext.context.sendActivity('111', '111', InputHints.IgnoringInput);
+        } else {
+            // Restart the main dialog with a different message the second time around
+            return await stepContext.replaceDialog(this.initialDialogId, { restartMsg: 'end ...' });
+        }
     }
 }
 
